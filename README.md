@@ -1,2 +1,0 @@
-# DJScratchRevised
-MPC Standalone Turntable
