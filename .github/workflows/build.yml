@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Locate project
+      - name: Locate project (unpack the source zip if that's what was uploaded)
         run: |
           if [ -f Makefile ]; then echo "PROJ=." >> "$GITHUB_ENV"
           elif [ -f DJScratch-MPC/Makefile ]; then echo "PROJ=DJScratch-MPC" >> "$GITHUB_ENV"
@@ -22,7 +22,7 @@ jobs:
             dir=$(dirname "$(find src_unzipped -name Makefile | head -1)")
             [ -n "$dir" ] || { echo "No Makefile inside the zip"; exit 1; }
             echo "PROJ=$dir" >> "$GITHUB_ENV"
-          else echo "Can't find the DJScratch project"; exit 1; fi
+          else echo "Can't find the DJScratch project (Makefile or source zip)"; exit 1; fi
 
       - name: Install toolchain
         run: |
@@ -36,7 +36,7 @@ jobs:
           make test
           make abi32
 
-      - name: Build ARM plugin and package
+      - name: Build ARM plugin + package
         working-directory: ${{ env.PROJ }}
         run: |
           chmod +x scripts/*.sh mpc/*.sh
@@ -53,6 +53,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: DJ Scratch 1.1.0 (build ${{ github.run_number }})
+          name: DJ Scratch 1.8 (build ${{ github.run_number }})
           make_latest: true
-          files: ${{ env.PROJ }}/dist/DJScratch-1.1.0-mpc-armv7.zip
+          files: |
+            ${{ env.PROJ }}/dist/DJScratch-1.4.0-mpc-armv7.zip
+            ${{ env.PROJ }}/dist/setup.sh
